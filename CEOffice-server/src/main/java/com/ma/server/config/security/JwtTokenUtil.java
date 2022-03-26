@@ -22,9 +22,10 @@ public class JwtTokenUtil {
     //用户创建时间
     private static final String CLAIM_KEY_CREATE="created";
 
+
     //在配置文件拿：# JWT 加解密使用的密钥
     @Value("${jwt.secret}")
-    private String secret;
+    private static String secret;
     //# JWT的超期限时间（60*60*24）
     @Value("${jwt.expiration}")
     private Long expiration;
@@ -118,7 +119,7 @@ public class JwtTokenUtil {
      * @param token
      * @return
      */
-    private Claims getClaimsFromToken(String token) {
+    private static Claims getClaimsFromToken(String token) {
         Claims claims = null;
         try {
              claims = Jwts.parser()

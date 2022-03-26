@@ -29,7 +29,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private IAdminService adminService;
-
+    private restfulAccessDeniedHandler restfulAccessDeniedHandler;
+    private restAuthorizationEntryPoint restAuthorizationEntryPoint;
 
     /**
      * 编写security的完整配置
@@ -48,27 +49,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 //允许登录
                 .authorizeRequests()
-                .antMatchers("/login","logout")
+                .antMatchers("/login","/logout")
                 .permitAll()
                 //除了login和logout，其他请求都要拦截，进行验证
                 .anyRequest()
                 .authenticated()
                 .and()
+                //禁用缓存
                 .headers()
                 .cacheControl();
 
         //添加Jwt 登录授权过滤器
-        http.addFilterBefore(jwtAuthencationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new jwtAuthencationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         //添加自定义未授权和未登录结果返回
         http.exceptionHandling()
                 //403
                 .accessDeniedHandler(restfulAccessDeniedHandler)
-                //403
+                //403  未登录
                 .authenticationEntryPoint(restAuthorizationEntryPoint);
-
      }
-
-
 
     /**
      * spring security  会走我们重写的userDetail获取到我们额username，--> 通过passwordEncoder去匹配密码
@@ -100,5 +99,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public jwtAuthencationTokenFilter jwtAuthencationTokenFilter() {
+        return new jwtAuthencationTokenFilter();
     }
 }
